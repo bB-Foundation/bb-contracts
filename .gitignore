@@ -1,0 +1,8 @@
+/dist
+/node_modules
+
+target
+.snfoundry_cache/
+.env
+local-devnet
+tmp
