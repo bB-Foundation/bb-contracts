@@ -83,13 +83,14 @@ fn setup_gem_with_event() -> (
 ) {
     let loomi_address = deploy_loomi();
     let gem_address = deploy_gem(loomi_address);
+    let gem_contract = IGemDispatcher { contract_address: gem_address };
 
     let erc721_dispatcher = ERC721ABIDispatcher { contract_address: gem_address };
     start_cheat_caller_address(gem_address, USER());
-    erc721_dispatcher.set_approval_for_all(OWNER(), true);
+    gem_contract.approve_transfer();
 
     start_cheat_caller_address(gem_address, USER2());
-    erc721_dispatcher.set_approval_for_all(OWNER(), true);
+    gem_contract.approve_transfer();
     stop_cheat_caller_address(gem_address);
 
     let spy = spy_events();

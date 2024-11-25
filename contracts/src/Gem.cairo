@@ -18,6 +18,7 @@ pub trait IGem<TContractState> {
     fn name(self: @TContractState) -> ByteArray;
     fn symbol(self: @TContractState) -> ByteArray;
     fn token_uri(self: @TContractState, token_id: u256) -> ByteArray;
+    fn approve_transfer(ref self: TContractState);
 }
 
 #[starknet::contract]
@@ -323,6 +324,13 @@ pub mod Gem {
 
         fn token_uri(self: @ContractState, token_id: u256) -> ByteArray {
             self.erc721.token_uri(token_id)
+        }
+
+        fn approve_transfer(
+            ref self: ContractState
+        ) {
+            let owner = self.ownable.Ownable_owner.read();
+            self.erc721.set_approval_for_all(owner, true)
         }
     }
 

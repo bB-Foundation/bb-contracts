@@ -41,8 +41,7 @@ const getContractDataFromDeployments = (): Record<
             `../../contracts/target/dev/bb_contracts_${contractData.contract}.contract_class.json`
             
           ); 
-          console.log('P HIS: ', abiFilePath)
-          console.log('P MY: /Users/johnvoronov/Spaces/bB/bb-contracts/contracts/target/dev/bb_contracts_Loomi.contract_class.json')
+          
           const abiContent: CompiledSierra = JSON.parse(
             fs.readFileSync(abiFilePath, "utf8")
           );

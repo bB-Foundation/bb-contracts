@@ -7,11 +7,11 @@ dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
 // devnet
 const PRIVATE_KEY_DEVNET =
-  process.env.PRIVATE_KEY_DEVNET || "0xf320712abb71d832640dda2144a55278";
+  process.env.PRIVATE_KEY_DEVNET || "0x564104eda6342ba54f2a698c0342b22b";
 const RPC_URL_DEVNET = process.env.RPC_URL_DEVNET || "http://127.0.0.1:5050";
 const ACCOUNT_ADDRESS_DEVNET =
   process.env.ACCOUNT_ADDRESS_DEVNET ||
-  "0x39ef101f5d04a6679575799c4973ce68173aa789b1db7fbf148053c4665775d";
+  "0x6e1665171388ee560b46a9c321446734fefd29e9c94f969d6ecd0ca21db26aa";
 
 const providerDevnet =
   RPC_URL_DEVNET && new RpcProvider({ nodeUrl: RPC_URL_DEVNET });

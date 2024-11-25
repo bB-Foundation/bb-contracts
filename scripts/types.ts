@@ -14,3 +14,10 @@ export type DeployContractParams = {
   constructorArgs?: RawArgs;
   options?: UniversalDetails;
 };
+
+export type DeclareContractParams = {
+  contract: string;
+  contractName?: string;
+  constructorArgs?: RawArgs;
+  options?: UniversalDetails;
+};

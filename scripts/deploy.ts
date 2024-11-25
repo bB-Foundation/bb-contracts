@@ -3,6 +3,7 @@ import {
   executeDeployCalls,
   exportDeployments,
   deployer,
+  declareContract,
 } from "./deploy-contract";
 import { green } from "./helpers/colorize-log";
 
@@ -50,7 +51,43 @@ const deployScript = async (): Promise<void> => {
       base_uri: "https://example.com/api/lomi",
     },
   });
-  console.log(1111, loomiAddress)
+
+  const { address: gemAddress } = await deployContract({
+    contract: "Gem",
+    constructorArgs: {
+      owner: deployer.address,
+      loomi_address: loomiAddress,
+      base_uri: "https://example.com/api/gem",
+    },
+  });
+
+  const { address: sbtAddress } = await deployContract({
+    contract: "SBT",
+    constructorArgs: {
+      owner: deployer.address,
+      base_uri: "https://example.com/api/sbt",
+    },
+  });
+
+  const { classHash: questClassHash } = await declareContract({
+    contract: "QuestFactory",
+    constructorArgs: {
+      owner: deployer.address,
+      gem_address: gemAddress,
+      sbt_address: sbtAddress,
+      base_uri: "https://example.com/api/sbt",
+    },
+  });
+
+  const { address: questFactoryAddress } = await deployContract({
+    contract: "QuestFactory",
+    constructorArgs: {
+      owner: deployer.address,
+      gem_contract: gemAddress,
+      sbt_contract: sbtAddress,
+      quest_class_hash: questClassHash
+    },
+  });
 };
 
 deployScript()

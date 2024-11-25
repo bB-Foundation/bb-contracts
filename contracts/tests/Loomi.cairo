@@ -56,7 +56,7 @@ fn test_minting() {
 
     let erc721_dispatcher = ERC721ABIDispatcher { contract_address: loomi_address };
 
-    // Start acting as loomi contract
+    // Start acting as gem contract
     start_cheat_caller_address(loomi_address, CALLER());
 
     // Mint LOOMI - token ID will be number as u256

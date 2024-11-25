@@ -14,7 +14,7 @@ import {
   TransactionReceipt,
   BigNumberish,
 } from "starknet";
-import { DeployContractParams, Network } from "./types";
+import { DeployContractParams, DeclareContractParams, Network } from "./types";
 import { green, red, yellow } from "./helpers/colorize-log";
 import { getTxVersion } from "./helpers/fees";
 
@@ -149,10 +149,9 @@ const deployContract = async (
   address: string;
 }> => {
   const { contract, constructorArgs, contractName, options } = params;
-  console.log(111, contract)
 
   try {
-    console.log(2222, await deployer.getContractVersion(deployer.address));
+    await deployer.getContractVersion(deployer.address);
   } catch (e) {
     if (e.toString().includes("Contract not found")) {
       const errorMessage = `The wallet you're using to deploy the contract is not deployed in the ${networkName} network.`;
@@ -163,17 +162,9 @@ const deployContract = async (
       throw e;
     }
   }
-  console.log(3333)
 
   let compiledContractCasm;
   let compiledContractSierra;
-
-  console.log('D HIS: ', path.resolve(
-    __dirname,
-    `../contracts/target/dev/bb_contracts_${contract}.compiled_contract_class.json`
-  ))
-  
-  console.log('D MY: /Users/johnvoronov/Spaces/bB/bb-contracts/contracts/target/dev/bb_contracts_Loomi.contract_class.json')
 
   try {
     compiledContractCasm = JSON.parse(
@@ -211,12 +202,6 @@ const deployContract = async (
   }
 
   try {
-    console.log('D HIS: ', path.resolve(
-      __dirname,
-      `../contracts/target/dev/bb_contracts_${contract}.contract_class.json`
-    ))
-    
-    console.log('D MY: /Users/johnvoronov/Spaces/bB/bb-contracts/contracts/target/dev/bb_contracts_Loomi.contract_class.json')
     compiledContractSierra = JSON.parse(
       fs
         .readFileSync(
@@ -272,6 +257,87 @@ const deployContract = async (
     classHash: classHash,
     address: contractAddress,
   };
+};
+
+/**
+ * Declare a contract using the specified parameters.
+ *
+ * @param {DeclareContractParams} params - The parameters for declaring the contract.
+ * @param {string} params.contract - The name of the contract to declare.
+ * @param {UniversalDetails} [params.options] - Additional declaration options (optional).
+ *
+ * @returns {Promise<{ classHash: string }>} The declared contract's class hash.
+ *
+ * @example
+ * /// Example usage of declareContract function
+ * const result = await declareContract({
+ *   contract: "YourContract",
+ *   options: { maxFee: BigInt(1000000000000) }
+ * });
+ * console.log("Declared class hash:", result.classHash);
+ */
+const declareContract = async (
+  params: DeclareContractParams
+): Promise<{ classHash: string }> => {
+  const { contract, options } = params;
+
+  let compiledContractCasm;
+  let compiledContractSierra;
+
+  try {
+    // Load the CASM file for the contract
+    compiledContractCasm = JSON.parse(
+      fs
+        .readFileSync(
+          path.resolve(
+            __dirname,
+            `../contracts/target/dev/bb_contracts_${contract}.compiled_contract_class.json`
+          )
+        )
+        .toString("ascii")
+    );
+  } catch (error) {
+    console.error(
+      red(
+        `Error loading CASM file for contract "${contract}": ${error.message}`
+      )
+    );
+    throw new Error(`Failed to load CASM file for contract "${contract}"`);
+  }
+
+  try {
+    compiledContractSierra = JSON.parse(
+      fs
+        .readFileSync(
+          path.resolve(
+            __dirname,
+            `../contracts/target/dev/bb_contracts_${contract}.contract_class.json`
+          )
+        )
+        .toString("ascii")
+    );
+  } catch (error) {
+    console.error(
+      red(
+        `Error loading Sierra file for contract "${contract}": ${error.message}`
+      )
+    );
+    throw new Error(`Failed to load Sierra file for contract "${contract}"`);
+  }
+
+  console.log(yellow("Declaring Contract "), contract);
+
+  const { classHash } = await declareIfNot_NotWait(
+    {
+      contract: compiledContractSierra,
+      casm: compiledContractCasm,
+    },
+    options
+  );
+
+  console.log(green("Contract Declared with class hash: "), classHash);
+
+  return { classHash };
 };
 
 const executeDeployCalls = async (options?: UniversalDetails) => {
@@ -351,6 +417,7 @@ const exportDeployments = () => {
 
 export {
   deployContract,
+  declareContract,
   provider,
   deployer,
   loadExistingDeployments,
