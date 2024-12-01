@@ -48,7 +48,7 @@ const deployScript = async (): Promise<void> => {
     contract: "Loomi",
     constructorArgs: {
       owner: deployer.address,
-      base_uri: "https://example.com/api/lomi",
+      base_uri: "https://example.com/api/loomi",
     },
   });
 

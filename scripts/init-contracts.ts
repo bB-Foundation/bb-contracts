@@ -38,22 +38,25 @@ async function main() {
   const gemContract = new Contract(gemAbi, gemAddress, account);
 
   try {
-    // Register affiliates
     console.log(yellow('Adding trusted handler...'));
-  
     console.log(green(`Adding QuestFactory (${questFactoryAddress}) as a trusted handler to the Gem contract.`));
-    // Populate the transaction to add the trusted handler
+
     const gemAddTrustedHandlerTx = gemContract.populate('add_trusted_handler', [questFactoryAddress]);
+    const feeEstimate = await account.estimateFee([gemAddTrustedHandlerTx]);
 
-    console.log(green('Sending transactions...'));
+    console.log(yellow(`Estimated fee: ${feeEstimate.overall_fee.toString()}`));
 
-    const result = await account.execute([
-      gemAddTrustedHandlerTx
-    ]);
+    const buffer = BigInt(200); // 200% buffer
+    const maxFee = (feeEstimate.overall_fee * buffer) / BigInt(100); // Apply buffer
+
+    console.log(yellow(`Max fee (with buffer): ${maxFee.toString()}`));
+
+    const result = await account.execute([gemAddTrustedHandlerTx], undefined, {
+      maxFee: maxFee
+    });
 
     console.log(green(`Waiting for transaction ${result.transaction_hash} to be included in a block...`));
-    const txReceipt = await provider.waitForTransaction(result.transaction_hash);
-
+    await provider.waitForTransaction(result.transaction_hash);
     console.log(green('Initialization completed successfully!'));
   } catch (error) {
     console.error(red('Error during initialization:'), error);
@@ -64,22 +67,25 @@ async function main() {
   const loomiContract = new Contract(loomiAbi, loomiAddress, account);
 
   try {
-    // Register affiliates
     console.log(yellow('Approving minter...'));
-  
-    console.log(green(`Adding Gem (${gemAddress}) as a approved minter to the Loomi contract.`));
-    // Populate the transaction to approve minter
+    console.log(green(`Adding Gem (${gemAddress}) as an approved minter to the Loomi contract.`));
+
     const loomiApproveMinterTx = loomiContract.populate('approve_minter', [gemAddress]);
+    const feeEstimate = await account.estimateFee([loomiApproveMinterTx]);
 
-    console.log(green('Sending transactions...'));
+    console.log(yellow(`Estimated fee: ${feeEstimate.overall_fee.toString()}`));
 
-    const result = await account.execute([
-      loomiApproveMinterTx
-    ]);
+    const buffer = BigInt(200); // 200% buffer
+    const maxFee = (feeEstimate.overall_fee * buffer) / BigInt(100); // Apply buffer
+
+    console.log(yellow(`Max fee (with buffer): ${maxFee.toString()}`));
+
+    const result = await account.execute([loomiApproveMinterTx], undefined, {
+      maxFee: maxFee
+    });
 
     console.log(green(`Waiting for transaction ${result.transaction_hash} to be included in a block...`));
-    const txReceipt = await provider.waitForTransaction(result.transaction_hash);
-
+    await provider.waitForTransaction(result.transaction_hash);
     console.log(green('Initialization completed successfully!'));
   } catch (error) {
     console.error(red('Error during initialization:'), error);
