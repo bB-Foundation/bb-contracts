@@ -150,6 +150,10 @@ fn test_join_quest() {
     let sbt_dispatcher = ISBTDispatcher { contract_address: sbt_address };
     sbt_dispatcher.mint();
 
+    // Launch the quest
+    start_cheat_caller_address(quest.contract_address, OWNER());
+    quest.launch();
+
     start_cheat_caller_address(quest.contract_address, caller);
 
     // Join the quest
@@ -159,6 +163,18 @@ fn test_join_quest() {
     let expected_event = Quest::Event::QuestJoined(QuestJoined { participant: caller, });
     spy.assert_emitted(@array![(quest.contract_address, expected_event)]);
     // TODO: Check caller in participants
+}
+
+#[test]
+#[should_panic(expected: ('Invalid quest status',))]
+fn test_join_quest_invalid_status() {
+    let (_, quest, _, _) = setup_quest_with_event();
+    let caller = CALLER();
+
+    start_cheat_caller_address(quest.contract_address, caller);
+
+    // Add task
+    quest.join_quest();
 }
 
 #[test]
@@ -172,8 +188,12 @@ fn test_join_quest_participant_already_joined() {
     let sbt_dispatcher = ISBTDispatcher { contract_address: sbt_address };
     sbt_dispatcher.mint();
 
-    start_cheat_caller_address(quest.contract_address, caller);
+    // Launch the quest
+    start_cheat_caller_address(quest.contract_address, OWNER());
+    quest.launch();
 
+    start_cheat_caller_address(quest.contract_address, caller);
+    
     // Join the quest
     quest.join_quest();
 
@@ -186,6 +206,10 @@ fn test_join_quest_participant_already_joined() {
 fn test_join_quest_no_sbt_token_owned() {
     let (_, quest, _, _) = setup_quest_with_event();
     let caller = CALLER();
+
+    // Launch the quest
+    start_cheat_caller_address(quest.contract_address, OWNER());
+    quest.launch();
 
     start_cheat_caller_address(quest.contract_address, caller);
 
@@ -213,6 +237,25 @@ fn test_add_task() {
 }
 
 #[test]
+#[should_panic(expected: ('Invalid quest status',))]
+fn test_add_task_invalid_status() {
+    let (_, quest, _, _) = setup_quest_with_event();
+    let owner = OWNER();
+
+    start_cheat_caller_address(quest.contract_address, owner);
+
+    // Launch the quest
+    quest.launch();
+
+    let task_id = 1;
+    let code = 1;
+    let hashed_code = PoseidonTrait::new().update_with(code).finalize();
+
+    // Add task
+    quest.add_task(task_id, array![hashed_code]);
+}
+
+#[test]
 #[should_panic(expected: ('Caller is not the owner',))]
 fn test_add_task_not_owner() {
     let (_, quest, _, _) = setup_quest_with_event();
@@ -234,13 +277,15 @@ fn test_claim_reward() {
     let owner = OWNER();
 
     start_cheat_caller_address(quest.contract_address, owner);
-
     let task_id = 1;
     let code = 1;
     let hashed_code = PoseidonTrait::new().update_with(code).finalize();
 
     // Add task
     quest.add_task(task_id, array![hashed_code]);
+
+    // Launch the quest
+    quest.launch();
 
     // Setup caller
     let caller = CALLER();
@@ -264,10 +309,39 @@ fn test_claim_reward() {
 }
 
 #[test]
+#[should_panic(expected: ('Invalid quest status',))]
+fn test_claim_reward_invalid_status() {
+    let (_, quest, gem_address, _) = setup_quest_with_event();
+    let owner = OWNER();
+
+    start_cheat_caller_address(quest.contract_address, owner);
+    let task_id = 1;
+    let code = 1;
+    let hashed_code = PoseidonTrait::new().update_with(code).finalize();
+
+    // Add task
+    quest.add_task(task_id, array![hashed_code]);
+
+    let caller = CALLER();
+    start_cheat_caller_address(quest.contract_address, caller);
+
+    // Add task
+    quest.join_quest();
+
+    start_cheat_caller_address(gem_address, quest.contract_address);
+    // Claim reward
+    quest.claim_reward(task_id, code);
+}
+
+#[test]
 #[should_panic(expected: ('Participant has not joined',))]
 fn test_claim_reward_participant_already_joined() {
     let (_, quest, gem_address, _) = setup_quest_with_event();
     let caller = CALLER();
+
+    // Launch the quest
+    start_cheat_caller_address(quest.contract_address, OWNER());
+    quest.launch();
 
     start_cheat_caller_address(quest.contract_address, caller);
     start_cheat_caller_address(gem_address, quest.contract_address);
@@ -281,6 +355,10 @@ fn test_claim_reward_participant_already_joined() {
 fn test_claim_reward_no_sbt_token_owned() {
     let (_, quest, gem_address, _) = setup_quest_with_event();
     let caller = CALLER();
+
+    // Launch the quest
+    start_cheat_caller_address(quest.contract_address, OWNER());
+    quest.launch();
 
     start_cheat_caller_address(quest.contract_address, caller);
     // Join the quest
@@ -297,7 +375,6 @@ fn test_claim_reward_unauthorized_minting_attempt() {
     let (_, quest, gem_address, sbt_address) = setup_quest_with_event();
 
     let owner = OWNER();
-
     start_cheat_caller_address(quest.contract_address, owner);
 
     let task_id = 1;
@@ -306,6 +383,9 @@ fn test_claim_reward_unauthorized_minting_attempt() {
 
     // Add task
     quest.add_task(task_id, array![hashed_code]);
+
+    // Launch the quest
+    quest.launch();
 
     // Setup caller
     let caller = CALLER();
@@ -335,9 +415,13 @@ fn test_claim_reward_invalid_code() {
     let task_id = 1;
     let code = 1;
     let hashed_code = PoseidonTrait::new().update_with(code).finalize();
-
+    let owner = OWNER();
+    
     // Add task
     quest.add_task(task_id, array![hashed_code]);
+
+    // Launch the quest
+    quest.launch();
 
     // Setup caller
     let caller = CALLER();

@@ -142,8 +142,10 @@ pub mod Quest {
         }
 
         fn add_task(ref self: ContractState, task_id: u256, code_hashes: Array<felt252>) {
-            // TODO: Add check for correct status
             self.ownable.assert_only_owner();
+
+            let quest_status = self.quest_status.read();
+            assert(quest_status == QuestStatus::Pending, Errors::INVALID_STATUS);
 
             for code_hash in code_hashes {
                 self.tasks.entry(task_id).entry(code_hash).write(true);
@@ -153,7 +155,9 @@ pub mod Quest {
         }
 
         fn join_quest(ref self: ContractState) {
-            // TODO: Add check for correct status
+            let quest_status = self.quest_status.read();
+            assert(quest_status == QuestStatus::Launched, Errors::INVALID_STATUS);
+
             let caller = get_caller_address();
             let participant = self.participants.entry(caller).read();
             assert(participant == false, Errors::PARTICIPANT_ALREADY_JOINED);
@@ -168,7 +172,9 @@ pub mod Quest {
         // TODO: Add leave_quest method
 
         fn claim_reward(ref self: ContractState, task_id: u256, code: felt252) {
-            // TODO: Add check for correct status
+            let quest_status = self.quest_status.read();
+            assert(quest_status == QuestStatus::Launched, Errors::INVALID_STATUS);
+
             let caller = get_caller_address();
 
             let participant = self.participants.entry(caller).read();
