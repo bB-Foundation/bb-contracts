@@ -269,27 +269,29 @@ pub mod Gem {
             let caller = get_caller_address();
 
             assert(token_ids.len() == 5, Errors::INVALID_AMOUNT_TOKENS);
-            
+
             let mut colors = array![];
-            for token_id in token_ids.clone() {
-                let owner = self.erc721.owner_of(token_id);
-                assert(owner == caller, Errors::TOKEN_NOT_OWNED);
+            for token_id in token_ids
+                .clone() {
+                    let owner = self.erc721.owner_of(token_id);
+                    assert(owner == caller, Errors::TOKEN_NOT_OWNED);
 
-                let gem_attributes = self.gems.entry(token_id).read();
+                    let gem_attributes = self.gems.entry(token_id).read();
 
-                // Ensure the color is unique among provided tokens.
-                for i in 0
-                    ..colors
-                        .len() {
-                            assert(
-                                *colors.at(i) != gem_attributes.color, Errors::DUPLICATE_GEM_COLORS
-                            );
-                        };
+                    // Ensure the color is unique among provided tokens.
+                    for i in 0
+                        ..colors
+                            .len() {
+                                assert(
+                                    *colors.at(i) != gem_attributes.color,
+                                    Errors::DUPLICATE_GEM_COLORS
+                                );
+                            };
 
-                colors.append(gem_attributes.color);
+                    colors.append(gem_attributes.color);
 
-                self.erc721.burn(token_id);
-            };
+                    self.erc721.burn(token_id);
+                };
 
             let loomi_dispatcher = ILoomiDispatcher { contract_address: self.loomi_address.read() };
             let new_token_id = loomi_dispatcher.mint(caller);

@@ -79,7 +79,7 @@ const deployScript = async (): Promise<void> => {
       owner: deployer.address,
       gem_contract: gemAddress,
       sbt_contract: sbtAddress,
-      quest_class_hash: questClassHash
+      quest_class_hash: questClassHash,
     },
   });
 };
