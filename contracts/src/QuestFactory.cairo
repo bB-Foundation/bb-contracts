@@ -14,17 +14,17 @@ pub trait IQuestFactory<TContractState> {
 
 #[starknet::contract]
 pub mod QuestFactory {
-    use super::IQuestFactory;
-    use crate::Gem::{IGemDispatcher, IGemDispatcherTrait};
-    use core::num::traits::Zero;
     use core::hash::{HashStateTrait, HashStateExTrait};
+    use core::num::traits::Zero;
     use core::poseidon::PoseidonTrait;
     use core::starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
     use core::starknet::{
         ClassHash, ContractAddress, SyscallResultTrait, syscalls::deploy_syscall, get_caller_address
     };
+    use crate::Gem::{IGemDispatcher, IGemDispatcherTrait};
     use openzeppelin::access::ownable::OwnableComponent;
     use openzeppelin::utils::serde::SerializedAppend;
+    use super::IQuestFactory;
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 

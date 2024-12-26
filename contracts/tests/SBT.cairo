@@ -1,16 +1,16 @@
-use starknet::{ContractAddress, contract_address_const};
-use snforge_std::{
-    declare, ContractClassTrait, start_cheat_caller_address, spy_events, EventSpy,
-    EventSpyAssertionsTrait, DeclareResultTrait
-};
 use bb_contracts::SBT::ISBTDispatcher;
 use bb_contracts::SBT::ISBTDispatcherTrait;
 use bb_contracts::SBT::SBT::{Team, SBTMinted};
 use bb_contracts::SBT::SBT;
+use openzeppelin::utils::serde::SerializedAppend;
 
 use openzeppelin_testing::constants::{OWNER};
-use openzeppelin::utils::serde::SerializedAppend;
 use openzeppelin_token::erc721::interface::{ERC721ABIDispatcher, ERC721ABIDispatcherTrait};
+use snforge_std::{
+    declare, ContractClassTrait, start_cheat_caller_address, spy_events, EventSpy,
+    EventSpyAssertionsTrait, DeclareResultTrait
+};
+use starknet::{ContractAddress, contract_address_const};
 
 fn USER() -> ContractAddress {
     contract_address_const::<'USER'>()
@@ -24,7 +24,7 @@ fn deploy_sbt() -> ContractAddress {
     let contract = declare("SBT").unwrap().contract_class();
     let mut calldata = array![];
     calldata.append_serde(OWNER());
-    let base_uri: ByteArray = "https://api.example.com/gem/";
+    let base_uri: ByteArray = "https://api.example.com/reward/gem/";
     calldata.append_serde(base_uri);
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
     contract_address
@@ -171,7 +171,7 @@ fn test_token_uri() {
     let user_felt: felt252 = USER().into();
     let token_id: u256 = user_felt.into();
 
-    let expected_uri = format!("https://api.example.com/gem/{}", token_id);
+    let expected_uri = format!("https://api.example.com/reward/gem/{}", token_id);
     assert_eq!(sbt_dispatcher.token_uri(token_id), expected_uri);
 }
 

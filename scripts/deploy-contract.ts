@@ -66,7 +66,7 @@ interface IBuildUDCCall {
 
 let deployments = {};
 let deployCalls: ICall[] = [];
-console.log(111, networks)
+
 const { provider, deployer }: Network = networks[networkName];
 
 const declareIfNot_NotWait = async (

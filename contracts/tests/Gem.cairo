@@ -1,23 +1,23 @@
-use starknet::{ContractAddress, contract_address_const};
+use bb_contracts::Gem::Gem::{
+    GemColor, GemMinted, GemsSwapped, TrustedHandlerAdded, MinterApproved, TradeSuccessed
+};
+use bb_contracts::Gem::Gem;
+use bb_contracts::Gem::IGemDispatcher;
+use bb_contracts::Gem::IGemDispatcherTrait;
+
+use bb_contracts::Loomi::ILoomiDispatcher;
+use bb_contracts::Loomi::ILoomiDispatcherTrait;
+use bb_contracts::Quest::Quest;
+use openzeppelin::utils::serde::SerializedAppend;
+use openzeppelin_testing::constants::{OWNER};
+
+use openzeppelin_testing::{declare_and_deploy};
+use openzeppelin_token::erc721::interface::{ERC721ABIDispatcher, ERC721ABIDispatcherTrait};
 use snforge_std::{
     declare, ContractClassTrait, start_cheat_caller_address, stop_cheat_caller_address, spy_events,
     EventSpy, EventSpyAssertionsTrait, DeclareResultTrait
 };
-use bb_contracts::Quest::Quest;
-use bb_contracts::Gem::IGemDispatcher;
-use bb_contracts::Gem::IGemDispatcherTrait;
-use bb_contracts::Gem::Gem::{
-    GemColor, GemMinted, GemsSwaped, TrustedHandlerAdded, MinterApproved, TradeSuccessed
-};
-use bb_contracts::Gem::Gem;
-
-use bb_contracts::Loomi::ILoomiDispatcher;
-use bb_contracts::Loomi::ILoomiDispatcherTrait;
-
-use openzeppelin_testing::{declare_and_deploy};
-use openzeppelin_testing::constants::{OWNER};
-use openzeppelin::utils::serde::SerializedAppend;
-use openzeppelin_token::erc721::interface::{ERC721ABIDispatcher, ERC721ABIDispatcherTrait};
+use starknet::{ContractAddress, contract_address_const};
 
 fn USER() -> ContractAddress {
     contract_address_const::<'USER'>()
@@ -45,7 +45,7 @@ fn deploy_gem(loomi_address: ContractAddress) -> ContractAddress {
     let mut calldata = array![];
     calldata.append_serde(OWNER());
     calldata.append_serde(loomi_address);
-    let base_uri: ByteArray = "https://api.example.com/gem/";
+    let base_uri: ByteArray = "https://api.example.com/reward/gem/";
     calldata.append_serde(base_uri);
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
     contract_address
@@ -55,7 +55,7 @@ fn deploy_loomi() -> ContractAddress {
     let contract = declare("Loomi").unwrap().contract_class();
     let mut calldata = array![];
     calldata.append_serde(OWNER());
-    let base_uri: ByteArray = "https://api.example.com/loomi/";
+    let base_uri: ByteArray = "https://api.example.com/reward/loomi/";
     calldata.append_serde(base_uri);
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
     contract_address
@@ -287,8 +287,8 @@ fn test_swap() {
     assert(gem_erc721_dispatcher.balance_of(USER()) == 0, 'Wrong balance');
     assert(loomi_erc721_dispatcher.balance_of(USER()) == 1, 'Wrong balance');
 
-    // Сheck GEM swaped event
-    let expected_event = Gem::Event::GemsSwaped(GemsSwaped { user: USER() });
+    // Сheck GEM swapped event
+    let expected_event = Gem::Event::GemsSwapped(GemsSwapped { user: USER(), token_ids: array![TOKEN_1, TOKEN_2, TOKEN_3, TOKEN_4, TOKEN_5] });
     spy.assert_emitted(@array![(gem_address, expected_event)]);
 }
 
@@ -490,7 +490,7 @@ fn test_token_uri() {
     gem_dispatcher.mint(USER(), 0);
 
     let token_id: u256 = 1;
-    assert_eq!(gem_dispatcher.token_uri(token_id), "https://api.example.com/gem/1");
+    assert_eq!(gem_dispatcher.token_uri(token_id), "https://api.example.com/reward/gem/1");
 }
 
 #[test]

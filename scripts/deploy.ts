@@ -48,7 +48,7 @@ const deployScript = async (): Promise<void> => {
     contract: "Loomi",
     constructorArgs: {
       owner: deployer.address,
-      base_uri: "https://example.com/api/loomi",
+      base_uri: "http://localhost:5000/reward/loomi/",
     },
   });
 
@@ -57,7 +57,7 @@ const deployScript = async (): Promise<void> => {
     constructorArgs: {
       owner: deployer.address,
       loomi_address: loomiAddress,
-      base_uri: "https://example.com/api/gem",
+      base_uri: "http://localhost:5000/reward/gem/",
     },
   });
 
@@ -65,18 +65,12 @@ const deployScript = async (): Promise<void> => {
     contract: "SBT",
     constructorArgs: {
       owner: deployer.address,
-      base_uri: "https://example.com/api/sbt",
+      base_uri: "http://localhost:5000/sbt/",
     },
   });
 
   const { classHash: questClassHash } = await declareContract({
-    contract: "QuestFactory",
-    constructorArgs: {
-      owner: deployer.address,
-      gem_address: gemAddress,
-      sbt_address: sbtAddress,
-      base_uri: "https://example.com/api/sbt",
-    },
+    contract: "Quest",
   });
 
   const { address: questFactoryAddress } = await deployContract({

@@ -14,17 +14,17 @@ pub trait IQuest<TContractState> {
 
 #[starknet::contract]
 pub mod Quest {
-    use super::IQuest;
-    use crate::Gem::{IGemDispatcher, IGemDispatcherTrait};
-    use crate::SBT::{ISBTDispatcher, ISBTDispatcherTrait};
+    use core::hash::{HashStateTrait, HashStateExTrait};
     use core::num::traits::Zero;
+    use core::poseidon::PoseidonTrait;
     use core::starknet::storage::{
         StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry, Map
     };
     use core::starknet::{ContractAddress, get_caller_address};
-    use core::hash::{HashStateTrait, HashStateExTrait};
-    use core::poseidon::PoseidonTrait;
+    use crate::Gem::{IGemDispatcher, IGemDispatcherTrait};
+    use crate::SBT::{ISBTDispatcher, ISBTDispatcherTrait};
     use openzeppelin::access::ownable::OwnableComponent;
+    use super::IQuest;
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
@@ -81,6 +81,7 @@ pub mod Quest {
     #[derive(Drop, starknet::Event)]
     pub struct ParticipantRewarded {
         pub participant: ContractAddress,
+        pub task_id: u256,
         pub token_id: u256
     }
 
@@ -141,6 +142,7 @@ pub mod Quest {
         }
 
         fn add_task(ref self: ContractState, task_id: u256, code_hashes: Array<felt252>) {
+            // TODO: Add check for correct status
             self.ownable.assert_only_owner();
 
             for code_hash in code_hashes {
@@ -151,6 +153,7 @@ pub mod Quest {
         }
 
         fn join_quest(ref self: ContractState) {
+            // TODO: Add check for correct status
             let caller = get_caller_address();
             let participant = self.participants.entry(caller).read();
             assert(participant == false, Errors::PARTICIPANT_ALREADY_JOINED);
@@ -162,7 +165,10 @@ pub mod Quest {
             self.emit(QuestJoined { participant: caller });
         }
 
+        // TODO: Add leave_quest method
+
         fn claim_reward(ref self: ContractState, task_id: u256, code: felt252) {
+            // TODO: Add check for correct status
             let caller = get_caller_address();
 
             let participant = self.participants.entry(caller).read();
@@ -181,7 +187,7 @@ pub mod Quest {
             let gem_dispatcher = IGemDispatcher { contract_address: self.gem_contract.read() };
             let token_id = gem_dispatcher.mint(caller, quest_type_as_u8);
 
-            self.emit(ParticipantRewarded { participant: caller, token_id });
+            self.emit(ParticipantRewarded { participant: caller, task_id, token_id });
         }
 
         fn complete(ref self: ContractState) {

@@ -1,5 +1,5 @@
-use starknet::{ContractAddress};
 use crate::SBT::SBT::{Team};
+use starknet::{ContractAddress};
 
 #[starknet::interface]
 pub trait ISBT<TContractState> {
@@ -15,13 +15,13 @@ pub trait ISBT<TContractState> {
 
 #[starknet::contract]
 pub mod SBT {
-    use openzeppelin::access::ownable::OwnableComponent;
-    use openzeppelin_token::erc721::ERC721Component;
-    use openzeppelin_token::erc721::ERC721Component::ERC721HooksTrait;
-    use openzeppelin_introspection::src5::SRC5Component;
-    use starknet::{get_block_timestamp, get_caller_address, ContractAddress};
-    use starknet::storage::{Map, StoragePathEntry};
     use core::num::traits::Zero;
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin_introspection::src5::SRC5Component;
+    use openzeppelin_token::erc721::ERC721Component::ERC721HooksTrait;
+    use openzeppelin_token::erc721::ERC721Component;
+    use starknet::storage::{Map, StoragePathEntry};
+    use starknet::{get_block_timestamp, get_caller_address, ContractAddress};
     use super::{ISBT};
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);

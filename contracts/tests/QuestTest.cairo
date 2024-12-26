@@ -1,24 +1,24 @@
-use starknet::{ContractAddress};
-use snforge_std::{
-    declare, ContractClassTrait, start_cheat_caller_address, spy_events, EventSpy, EventSpyTrait,
-    EventSpyAssertionsTrait, DeclareResultTrait
-};
-use core::hash::{HashStateTrait, HashStateExTrait};
-use core::poseidon::PoseidonTrait;
+use bb_contracts::Gem::IGemDispatcher;
+use bb_contracts::Gem::IGemDispatcherTrait;
 use bb_contracts::Quest::IQuestDispatcher;
 use bb_contracts::Quest::IQuestDispatcherTrait;
 use bb_contracts::Quest::Quest::{
     QuestLaunched, QuestCompleted, QuestCanceled, QuestJoined, ParticipantRewarded, TaskAdded
 };
 use bb_contracts::Quest::Quest;
-use bb_contracts::Gem::IGemDispatcher;
-use bb_contracts::Gem::IGemDispatcherTrait;
 use bb_contracts::SBT::ISBTDispatcher;
 use bb_contracts::SBT::ISBTDispatcherTrait;
+use core::hash::{HashStateTrait, HashStateExTrait};
+use core::poseidon::PoseidonTrait;
+use openzeppelin::utils::serde::SerializedAppend;
+use openzeppelin_testing::constants::{CALLER, OWNER};
 
 use openzeppelin_testing::{declare_and_deploy};
-use openzeppelin_testing::constants::{CALLER, OWNER};
-use openzeppelin::utils::serde::SerializedAppend;
+use snforge_std::{
+    declare, ContractClassTrait, start_cheat_caller_address, spy_events, EventSpy, EventSpyTrait,
+    EventSpyAssertionsTrait, DeclareResultTrait
+};
+use starknet::{ContractAddress};
 
 fn QUEST_CALLDATA() -> Span<felt252> {
     let mut calldata = array![];
@@ -32,7 +32,7 @@ fn deploy_gem(loomi_address: ContractAddress) -> ContractAddress {
     let mut calldata = array![];
     calldata.append_serde(OWNER());
     calldata.append_serde(loomi_address);
-    let base_uri: ByteArray = "https://api.example.com/gem/";
+    let base_uri: ByteArray = "https://api.example.com/reward/gem/";
     calldata.append_serde(base_uri);
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
     contract_address
@@ -42,7 +42,7 @@ fn deploy_loomi() -> ContractAddress {
     let contract = declare("Loomi").unwrap().contract_class();
     let mut calldata = array![];
     calldata.append_serde(OWNER());
-    let base_uri: ByteArray = "https://api.example.com/loomi/";
+    let base_uri: ByteArray = "https://api.example.com/reward/loomi/";
     calldata.append_serde(base_uri);
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
     contract_address
@@ -258,7 +258,7 @@ fn test_claim_reward() {
 
     // Check the event for participant rewarded
     let expected_event = Quest::Event::ParticipantRewarded(
-        ParticipantRewarded { participant: caller, token_id: 1 }
+        ParticipantRewarded { participant: caller, task_id, token_id: 1 }
     );
     spy.assert_emitted(@array![(quest.contract_address, expected_event)]);
 }

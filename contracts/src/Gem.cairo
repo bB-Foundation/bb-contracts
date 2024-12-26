@@ -23,16 +23,18 @@ pub trait IGem<TContractState> {
 
 #[starknet::contract]
 pub mod Gem {
+    use core::array::ArrayTrait;
+    use core::clone::Clone;
+    use core::num::traits::Zero;
     use crate::Loomi::{ILoomiDispatcher, ILoomiDispatcherTrait};
     use openzeppelin::access::ownable::OwnableComponent;
-    use openzeppelin_token::erc721::extensions::erc721_enumerable::ERC721EnumerableComponent;
-    use openzeppelin_token::erc721::ERC721Component;
-    use openzeppelin_token::erc721::ERC721Component::ERC721HooksTrait;
     use openzeppelin_introspection::src5::SRC5Component;
-    use starknet::{get_caller_address, ContractAddress};
+    use openzeppelin_token::erc721::ERC721Component::ERC721HooksTrait;
+    use openzeppelin_token::erc721::ERC721Component;
+    use openzeppelin_token::erc721::extensions::erc721_enumerable::ERC721EnumerableComponent;
     use starknet::storage::{Map, StoragePathEntry};
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-    use core::num::traits::Zero;
+    use starknet::{get_caller_address, ContractAddress};
     use super::{IGem};
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -66,7 +68,7 @@ pub mod Gem {
     #[derive(Drop, starknet::Event)]
     pub enum Event {
         GemMinted: GemMinted,
-        GemsSwaped: GemsSwaped,
+        GemsSwapped: GemsSwapped,
         MinterApproved: MinterApproved,
         TrustedHandlerAdded: TrustedHandlerAdded,
         TradeSuccessed: TradeSuccessed,
@@ -93,8 +95,9 @@ pub mod Gem {
         pub trusted_handler: ContractAddress
     }
     #[derive(Drop, starknet::Event)]
-    pub struct GemsSwaped {
-        pub user: ContractAddress
+    pub struct GemsSwapped {
+        pub user: ContractAddress,
+        pub token_ids: Array<u256>
     }
     #[derive(Drop, starknet::Event)]
     pub struct TradeSuccessed {
@@ -266,9 +269,9 @@ pub mod Gem {
             let caller = get_caller_address();
 
             assert(token_ids.len() == 5, Errors::INVALID_AMOUNT_TOKENS);
-
+            
             let mut colors = array![];
-            for token_id in token_ids {
+            for token_id in token_ids.clone() {
                 let owner = self.erc721.owner_of(token_id);
                 assert(owner == caller, Errors::TOKEN_NOT_OWNED);
 
@@ -291,7 +294,7 @@ pub mod Gem {
             let loomi_dispatcher = ILoomiDispatcher { contract_address: self.loomi_address.read() };
             let new_token_id = loomi_dispatcher.mint(caller);
 
-            self.emit(GemsSwaped { user: caller });
+            self.emit(GemsSwapped { user: caller, token_ids });
 
             new_token_id
         }
@@ -326,9 +329,7 @@ pub mod Gem {
             self.erc721.token_uri(token_id)
         }
 
-        fn approve_transfer(
-            ref self: ContractState
-        ) {
+        fn approve_transfer(ref self: ContractState) {
             let owner = self.ownable.Ownable_owner.read();
             self.erc721.set_approval_for_all(owner, true)
         }

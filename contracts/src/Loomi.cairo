@@ -13,14 +13,14 @@ pub trait ILoomi<TContractState> {
 
 #[starknet::contract]
 pub mod Loomi {
-    use openzeppelin::access::ownable::OwnableComponent;
-    use openzeppelin_token::erc721::extensions::erc721_enumerable::ERC721EnumerableComponent;
-    use openzeppelin_token::erc721::ERC721Component;
-    use openzeppelin_token::erc721::ERC721Component::ERC721HooksTrait;
-    use openzeppelin_introspection::src5::SRC5Component;
-    use starknet::{get_caller_address, ContractAddress};
-    use starknet::storage::{Map, StoragePathEntry};
     use core::num::traits::Zero;
+    use openzeppelin::access::ownable::OwnableComponent;
+    use openzeppelin_introspection::src5::SRC5Component;
+    use openzeppelin_token::erc721::ERC721Component::ERC721HooksTrait;
+    use openzeppelin_token::erc721::ERC721Component;
+    use openzeppelin_token::erc721::extensions::erc721_enumerable::ERC721EnumerableComponent;
+    use starknet::storage::{Map, StoragePathEntry};
+    use starknet::{get_caller_address, ContractAddress};
     use super::{ILoomi};
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -66,7 +66,8 @@ pub mod Loomi {
     }
     #[derive(Drop, starknet::Event)]
     pub struct LoomiMinted {
-        pub user: ContractAddress
+        pub user: ContractAddress,
+        pub token_id: u256
     }
     #[derive(Drop, starknet::Event)]
     pub struct MinterApproved {
@@ -118,7 +119,7 @@ pub mod Loomi {
             self.erc721.mint(user, next_token_id.into());
             self.last_token_id.write(next_token_id);
 
-            self.emit(LoomiMinted { user });
+            self.emit(LoomiMinted { user, token_id: next_token_id });
 
             next_token_id
         }

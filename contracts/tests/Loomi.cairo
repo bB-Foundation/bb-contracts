@@ -1,17 +1,16 @@
-use starknet::{ContractAddress, contract_address_const};
-use snforge_std::{
-    declare, ContractClassTrait, start_cheat_caller_address, spy_events, EventSpy,
-    EventSpyAssertionsTrait, DeclareResultTrait
-};
-
 use bb_contracts::Loomi::ILoomiDispatcher;
 use bb_contracts::Loomi::ILoomiDispatcherTrait;
 use bb_contracts::Loomi::Loomi::{LoomiMinted, MinterApproved};
 use bb_contracts::Loomi::Loomi;
+use openzeppelin::utils::serde::SerializedAppend;
 
 use openzeppelin_testing::constants::{CALLER, OWNER};
-use openzeppelin::utils::serde::SerializedAppend;
 use openzeppelin_token::erc721::interface::{ERC721ABIDispatcher, ERC721ABIDispatcherTrait};
+use snforge_std::{
+    declare, ContractClassTrait, start_cheat_caller_address, spy_events, EventSpy,
+    EventSpyAssertionsTrait, DeclareResultTrait
+};
+use starknet::{ContractAddress, contract_address_const};
 
 fn USER() -> ContractAddress {
     contract_address_const::<'USER'>()
@@ -25,7 +24,7 @@ fn deploy_loomi() -> ContractAddress {
     let contract = declare("Loomi").unwrap().contract_class();
     let mut calldata = array![];
     calldata.append_serde(OWNER());
-    let base_uri: ByteArray = "https://api.example.com/loomi/";
+    let base_uri: ByteArray = "https://api.example.com/reward/loomi/";
     calldata.append_serde(base_uri);
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
     contract_address
@@ -63,11 +62,11 @@ fn test_minting() {
     loomi_dispatcher.mint(USER());
 
     // Сheck LOOMI minted event
-    let expected_event = Loomi::Event::LoomiMinted(LoomiMinted { user: USER() });
+    let token_id: u256 = 1;
+    let expected_event = Loomi::Event::LoomiMinted(LoomiMinted { user: USER(), token_id });
     spy.assert_emitted(@array![(loomi_address, expected_event)]);
 
     // Verify ownership
-    let token_id: u256 = 1;
     assert(erc721_dispatcher.owner_of(token_id) == USER(), 'Wrong token owner');
     assert(erc721_dispatcher.balance_of(USER()) == 1, 'Wrong balance');
 }
@@ -188,7 +187,7 @@ fn test_token_uri() {
     loomi_dispatcher.mint(USER2());
 
     let token_id: u256 = 1;
-    assert_eq!(loomi_dispatcher.token_uri(token_id), "https://api.example.com/loomi/1");
+    assert_eq!(loomi_dispatcher.token_uri(token_id), "https://api.example.com/reward/loomi/1");
 }
 
 #[test]

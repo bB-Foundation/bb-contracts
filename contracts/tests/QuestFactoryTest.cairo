@@ -1,26 +1,26 @@
-use starknet::{ClassHash, ContractAddress, contract_address_const};
-use snforge_std::{
-    declare, ContractClassTrait, start_cheat_caller_address, stop_cheat_caller_address, spy_events,
-    EventSpy, EventSpyTrait, EventSpyAssertionsTrait, DeclareResultTrait
-};
+use bb_contracts::Gem::IGemDispatcher;
+use bb_contracts::Gem::IGemDispatcherTrait;
+use bb_contracts::Quest::IQuestDispatcher;
+use bb_contracts::Quest::IQuestDispatcherTrait;
+use bb_contracts::Quest::Quest;
 use bb_contracts::QuestFactory::IQuestFactoryDispatcher;
 use bb_contracts::QuestFactory::IQuestFactoryDispatcherTrait;
 use bb_contracts::QuestFactory::QuestFactory::{QuestCreated};
 use bb_contracts::QuestFactory::QuestFactory;
-use bb_contracts::Quest::IQuestDispatcher;
-use bb_contracts::Quest::IQuestDispatcherTrait;
-use bb_contracts::Quest::Quest;
-use bb_contracts::Gem::IGemDispatcher;
-use bb_contracts::Gem::IGemDispatcherTrait;
-
-
-use openzeppelin_testing::{declare_class, declare_and_deploy};
-use openzeppelin_testing::constants::{CALLER, OWNER, SALT};
-use openzeppelin::utils::deployments::{calculate_contract_address_from_deploy_syscall};
-use openzeppelin::utils::serde::SerializedAppend;
 
 use core::hash::{HashStateTrait, HashStateExTrait};
 use core::poseidon::PoseidonTrait;
+use openzeppelin::utils::deployments::{calculate_contract_address_from_deploy_syscall};
+use openzeppelin::utils::serde::SerializedAppend;
+use openzeppelin_testing::constants::{CALLER, OWNER, SALT};
+
+
+use openzeppelin_testing::{declare_class, declare_and_deploy};
+use snforge_std::{
+    declare, ContractClassTrait, start_cheat_caller_address, stop_cheat_caller_address, spy_events,
+    EventSpy, EventSpyTrait, EventSpyAssertionsTrait, DeclareResultTrait
+};
+use starknet::{ClassHash, ContractAddress, contract_address_const};
 
 fn QUEST_CLASS_HASH() -> ClassHash {
     declare_class("Quest").class_hash
@@ -39,7 +39,7 @@ fn deploy_gem(loomi_address: ContractAddress) -> ContractAddress {
     let mut calldata = array![];
     calldata.append_serde(OWNER());
     calldata.append_serde(loomi_address);
-    let base_uri: ByteArray = "https://api.example.com/gem/";
+    let base_uri: ByteArray = "https://api.example.com/reward/gem/";
     calldata.append_serde(base_uri);
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
     contract_address
@@ -49,7 +49,7 @@ fn deploy_loomi() -> ContractAddress {
     let contract = declare("Loomi").unwrap().contract_class();
     let mut calldata = array![];
     calldata.append_serde(OWNER());
-    let base_uri: ByteArray = "https://api.example.com/loomi/";
+    let base_uri: ByteArray = "https://api.example.com/reward/loomi/";
     calldata.append_serde(base_uri);
     let (contract_address, _) = contract.deploy(@calldata).unwrap();
     contract_address

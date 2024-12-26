@@ -28,11 +28,6 @@ process.env.FEE_TOKEN = argv.fee || "eth";
 process.env.NO_RESET = !argv.reset ? "true" : "false";
 
 // Execute the deploy script without the reset option
-console.log(`cd contracts && scarb build && ts-node ../scripts/deploy.ts` +
-      ` --network ${process.env.NETWORK}` +
-      ` --fee ${process.env.FEE_TOKEN}` +
-      ` --no-reset ${process.env.NO_RESET}` +
-      ` && ts-node ../scripts/helpers/parse-deployments.ts && cd ..`)
 try {
   execSync(
     `cd contracts && scarb build && ts-node ../scripts/deploy.ts` +
