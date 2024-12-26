@@ -39,9 +39,8 @@ const getContractDataFromDeployments = (): Record<
           const abiFilePath = path.join(
             __dirname,
             `../../contracts/target/dev/bb_contracts_${contractData.contract}.contract_class.json`
-            
-          ); 
-          
+          );
+
           const abiContent: CompiledSierra = JSON.parse(
             fs.readFileSync(abiFilePath, "utf8")
           );

@@ -193,7 +193,7 @@ fn test_join_quest_participant_already_joined() {
     quest.launch();
 
     start_cheat_caller_address(quest.contract_address, caller);
-    
+
     // Join the quest
     quest.join_quest();
 
@@ -416,7 +416,7 @@ fn test_claim_reward_invalid_code() {
     let code = 1;
     let hashed_code = PoseidonTrait::new().update_with(code).finalize();
     let owner = OWNER();
-    
+
     // Add task
     quest.add_task(task_id, array![hashed_code]);
 

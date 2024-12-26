@@ -288,7 +288,9 @@ fn test_swap() {
     assert(loomi_erc721_dispatcher.balance_of(USER()) == 1, 'Wrong balance');
 
     // Сheck GEM swapped event
-    let expected_event = Gem::Event::GemsSwapped(GemsSwapped { user: USER(), token_ids: array![TOKEN_1, TOKEN_2, TOKEN_3, TOKEN_4, TOKEN_5] });
+    let expected_event = Gem::Event::GemsSwapped(
+        GemsSwapped { user: USER(), token_ids: array![TOKEN_1, TOKEN_2, TOKEN_3, TOKEN_4, TOKEN_5] }
+    );
     spy.assert_emitted(@array![(gem_address, expected_event)]);
 }
 
