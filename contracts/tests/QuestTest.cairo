@@ -3,7 +3,7 @@ use bb_contracts::Gem::IGemDispatcherTrait;
 use bb_contracts::Quest::IQuestDispatcher;
 use bb_contracts::Quest::IQuestDispatcherTrait;
 use bb_contracts::Quest::Quest::{
-    QuestLaunched, QuestCompleted, QuestCanceled, QuestJoined, ParticipantRewarded, TaskAdded
+    QuestLaunched, QuestCompleted, QuestCanceled, QuestJoined, QuestLeft, ParticipantRewarded, TaskAdded
 };
 use bb_contracts::Quest::Quest;
 use bb_contracts::SBT::ISBTDispatcher;
@@ -215,6 +215,67 @@ fn test_join_quest_no_sbt_token_owned() {
 
     // Join the quest
     quest.join_quest();
+}
+
+#[test]
+fn test_leave_quest() {
+    let (mut spy, quest, _, sbt_address) = setup_quest_with_event();
+    let caller = CALLER();
+
+    // Setup caller
+    start_cheat_caller_address(sbt_address, caller);
+    let sbt_dispatcher = ISBTDispatcher { contract_address: sbt_address };
+    sbt_dispatcher.mint();
+
+    // Launch the quest
+    start_cheat_caller_address(quest.contract_address, OWNER());
+    quest.launch();
+
+    start_cheat_caller_address(quest.contract_address, caller);
+
+    // Join the quest
+    quest.join_quest();
+
+    // Leave the quest
+    quest.leave_quest();
+
+    // Check the event for quest joining
+    let expected_event = Quest::Event::QuestLeft(QuestLeft { participant: caller, });
+    spy.assert_emitted(@array![(quest.contract_address, expected_event)]);
+    // TODO: Check caller not in participants
+}
+
+#[test]
+#[should_panic(expected: ('Invalid quest status',))]
+fn test_leave_quest_invalid_status() {
+    let (_, quest, _, _) = setup_quest_with_event();
+    let caller = CALLER();
+
+    start_cheat_caller_address(quest.contract_address, caller);
+
+    // Leave the quest
+    quest.leave_quest();
+}
+
+#[test]
+#[should_panic(expected: ('Participant has not joined',))]
+fn test_leave_quest_participant_not_joined() {
+    let (_, quest, _, sbt_address) = setup_quest_with_event();
+    let caller = CALLER();
+
+    // Setup caller
+    start_cheat_caller_address(sbt_address, caller);
+    let sbt_dispatcher = ISBTDispatcher { contract_address: sbt_address };
+    sbt_dispatcher.mint();
+
+    // Launch the quest
+    start_cheat_caller_address(quest.contract_address, OWNER());
+    quest.launch();
+
+    start_cheat_caller_address(quest.contract_address, caller);
+
+    // Join the quest
+    quest.leave_quest();
 }
 
 #[test]

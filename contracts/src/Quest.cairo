@@ -4,6 +4,7 @@ use crate::Quest::Quest::{QuestStatus, QuestType};
 pub trait IQuest<TContractState> {
     fn launch(ref self: TContractState);
     fn join_quest(ref self: TContractState);
+    fn leave_quest(ref self: TContractState);
     fn claim_reward(ref self: TContractState, task_id: u256, code: felt252);
     fn add_task(ref self: TContractState, task_id: u256, code_hashes: Array<felt252>);
     fn complete(ref self: TContractState);
@@ -53,6 +54,7 @@ pub mod Quest {
         QuestCompleted: QuestCompleted,
         QuestCanceled: QuestCanceled,
         QuestJoined: QuestJoined,
+        QuestLeft: QuestLeft,
         TaskAdded: TaskAdded,
         ParticipantRewarded: ParticipantRewarded,
         #[flat]
@@ -72,6 +74,10 @@ pub mod Quest {
     }
     #[derive(Drop, starknet::Event)]
     pub struct QuestJoined {
+        pub participant: ContractAddress
+    }
+    #[derive(Drop, starknet::Event)]
+    pub struct QuestLeft {
         pub participant: ContractAddress
     }
     #[derive(Drop, starknet::Event)]
@@ -169,7 +175,17 @@ pub mod Quest {
             self.emit(QuestJoined { participant: caller });
         }
 
-        // TODO: Add leave_quest method
+        fn leave_quest(ref self: ContractState) {
+            let quest_status = self.quest_status.read();
+            assert(quest_status == QuestStatus::Launched, Errors::INVALID_STATUS);
+
+            let caller = get_caller_address();
+            let participant = self.participants.entry(caller).read();
+            assert(participant == true, Errors::PARTICIPANT_NOT_JOINED);
+
+            self.participants.entry(caller).write(false);
+            self.emit(QuestLeft { participant: caller });
+        }
 
         fn claim_reward(ref self: ContractState, task_id: u256, code: felt252) {
             let quest_status = self.quest_status.read();
