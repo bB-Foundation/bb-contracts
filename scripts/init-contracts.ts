@@ -40,6 +40,10 @@ async function main() {
   const gemAbi = deployedContracts[preferredChain].Gem.abi;
   const sbtAddress = deployedContracts[preferredChain].SBT.address;
   const sbtAbi = deployedContracts[preferredChain].SBT.abi;
+  const bbAvatarAddress = deployedContracts[preferredChain].BBAvatar.address;
+  const bbAvatarAbi = deployedContracts[preferredChain].BBAvatar.abi;
+  const wardrobeKeyAddress = deployedContracts[preferredChain].WardrobeKey.address;
+  const wardrobeKeyAbi = deployedContracts[preferredChain].WardrobeKey.abi;
   const questFactoryAddress =
     deployedContracts[preferredChain].QuestFactory.address;
   const questFactoryAbi = deployedContracts[preferredChain].QuestFactory.abi;

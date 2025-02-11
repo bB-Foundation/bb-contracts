@@ -3,7 +3,8 @@ use bb_contracts::Gem::IGemDispatcherTrait;
 use bb_contracts::Quest::IQuestDispatcher;
 use bb_contracts::Quest::IQuestDispatcherTrait;
 use bb_contracts::Quest::Quest::{
-    QuestLaunched, QuestCompleted, QuestCanceled, QuestJoined, QuestLeft, ParticipantRewarded, TaskAdded
+    QuestLaunched, QuestCompleted, QuestCanceled, QuestJoined, QuestLeft, ParticipantRewarded,
+    TaskAdded
 };
 use bb_contracts::Quest::Quest;
 use bb_contracts::SBT::ISBTDispatcher;

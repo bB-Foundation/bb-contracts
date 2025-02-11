@@ -138,7 +138,8 @@ mod BBAvatar {
                     .read();
                 // if they don't have accessory on, and they want to turn it on, check if they have
                 // the key
-                if !current_state && *accessory.is_on {// TODO: enable this once we have everything integrated
+                if !current_state
+                    && *accessory.is_on { // TODO: enable this once we have everything integrated
                 // assert(has_key, 'Caller does not have the key');
                 }
                 // write the new state

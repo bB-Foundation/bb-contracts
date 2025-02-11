@@ -48,7 +48,7 @@ const deployScript = async (): Promise<void> => {
     contract: "Loomi",
     constructorArgs: {
       owner: deployer.address,
-      base_uri: "http://localhost:5000/reward/loomi/",
+      base_uri: "https://bb-backend-stg.onrender.com/reward/loomi/",
     },
   });
 
@@ -57,7 +57,7 @@ const deployScript = async (): Promise<void> => {
     constructorArgs: {
       owner: deployer.address,
       loomi_address: loomiAddress,
-      base_uri: "http://localhost:5000/reward/gem/",
+      base_uri: "https://bb-backend-stg.onrender.com/reward/gem/",
     },
   });
 
@@ -65,7 +65,23 @@ const deployScript = async (): Promise<void> => {
     contract: "SBT",
     constructorArgs: {
       owner: deployer.address,
-      base_uri: "http://localhost:5000/sbt/",
+      base_uri: "https://bb-backend-stg.onrender.com/sbt/",
+    },
+  });
+
+  const { address: bbAvatarAddress } = await deployContract({
+    contract: "BBAvatar",
+    constructorArgs: {
+      owner: deployer.address,
+      base_uri: "https://bb-backend-stg.onrender.com/avatar/",
+    },
+  });
+
+  const { address: wardrobeKeyAddress } = await deployContract({
+    contract: "WardrobeKey",
+    constructorArgs: {
+      owner: deployer.address,
+      base_uri: "https://bb-backend-stg.onrender.com/key/",
     },
   });
 
